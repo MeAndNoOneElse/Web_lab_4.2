@@ -1,375 +1,186 @@
-# Программирование (Java) - Лабораторная №4
+# Отчёт по лабораторной работе №4
+## Веб-программирование
 
-Полноценное веб-приложение с аутентификацией, хранением результатов проверок точек и адаптивным клиентским интерфейсом.
-
-**Студент:**
-- Ануфриев Андрей Сергеевич
-- Группа: P3219
-
-
-
-## 📁 Материалы проекта
-- [**Задание**](https://se.ifmo.ru/courses/programming)
-- [**Код Backend**](./src/)
-- [**Код Frontend**](./front/)
+**Студент:** Ануфриев Андрей Сергеевич  
+**Группа:** P3219  
+**Университет:** ИТМО  
+**Дата:** 2025-2026
 
 ---
 
-## 📋 Описание проекта
+## 📋 Содержание
 
-Проект состоит из двух основных частей:
-
-- **Backend** на Java (Spring Boot) — предоставляет REST API для аутентификации, управления сессиями и работы с результатами
-- **Frontend** на Angular — реализует интерфейс пользователя с формами авторизации, графиком, формой ввода параметров и таблицей результатов
+1. [Введение](#введение)
+2. [Постановка задачи](#постановка-задачи)
+3. [Технологический стек](#технологический-стек)
+4. [Архитектура приложения](#архитектура-приложения)
+5. [Реализованный функционал](#реализованный-функционал)
+6. [Технические решения](#технические-решения)
+7. [Структура проекта](#структура-проекта)
+8. [Выводы](#выводы)
 
 ---
 
-## 🛠️ Технологии
+## Введение
+
+В данной лабораторной работе разработано полнофункциональное веб-приложение для проверки точек в координатной плоскости с аутентификацией пользователей, управлением сессиями и сохранением результатов.
+
+Приложение демонстрирует применение современных подходов к разработке веб-приложений, включая:
+- **REST API архитектуру** с использованием JAX-RS
+- **JWT аутентификацию** с refresh-токенами
+- **Встроенную реляционную БД** (Apache Derby)
+- **Фронтенд на Vue 3 с TypeScript**
+- **SPA (Single Page Application)** архитектуру
+
+---
+
+## Постановка задачи
+
+### Основные требования
+1. **Аутентификация и авторизация**
+    - Система регистрации пользователей
+    - Вход с генерацией JWT-токенов
+    - Безопасное хранение паролей (BCrypt хеширование)
+
+2. **Функциональность проверки точек**
+    - Проверка попадания точки в заданную область
+    - Сохранение результатов в БД
+    - Вывод истории проверок
+
+3. **Управление сессиями**
+    - Поддержка нескольких активных сессий
+    - Отслеживание IP-адреса и User-Agent
+
+4. **Интерактивный интерфейс**
+    - Визуализация области на графике
+    - Форма ввода параметров (X, Y, R)
+    - Таблица результатов с сортировкой
+
+---
+
+## Технологический стек
 
 ### Backend
-- **Java 17+**
-- **Spring Boot 3.1.5** — основной фреймворк
-- **Spring Web** — REST API
-- **Spring Security** — JWT-аутентификация
-- **Spring Data JPA** — работа с БД (Hibernate)
-- **Spring AOP** — логирование запросов к БД
-- **PostgreSQL** — основная база данных
-- **JWT (jjwt)** — JSON Web Token для безопасности
-- **BCrypt** — хеширование паролей
-- **Lombok** — сокращение кода
-- **Gradle** — система сборки
+
+| Технология | Версия | Назначение |
+|-----------|--------|-----------|
+| **Java** | 17+ | Язык разработки |
+| **JAX-RS (Jersey)** | 3.1.5 | REST API фреймворк |
+| **Grizzly** | 4.0.2 | HTTP сервер |
+| **JPA/EclipseLink** | 4.0.2 | ORM, работа с БД |
+| **Apache Derby** | 10.16.1.1 | Встроенная реляционная БД |
+| **JJWT** | 0.12.5 | JWT токены |
+| **BCrypt** | 0.4 | Хеширование паролей |
+| **Jackson** | 2.16.1 | JSON сериализация |
+| **SLF4J/Logback** | Latest | Логирование |
+| **Gradle** | Latest | System для сборки |
+
+**Версия Java:** OpenJDK 17 LTS
 
 ### Frontend
-- **Angular 21.0** — основной фреймворк
-- **TypeScript 5.9** — язык программирования
-- **RxJS 7.8** — реактивное программирование
-- **HTML5/CSS3** — верстка и стили
-- **Responsive Design** — адаптивный дизайн для всех экранов
 
-### Архитектурные решения
-- **JWT-аутентификация** с access и refresh токенами
-- **Многосессионность** — несколько браузеров одновременно
-- **In-memory кеш** результатов для производительности
-- **HTTP-фильтры** для аутентификации и логирования
-- **Многослойная архитектура**: Controller → Service → Repository
+| Технология | Версия | Назначение |
+|-----------|--------|-----------|
+| **Vue.js** | 3.4.15 | Фреймворк UI |
+| **TypeScript** | 5.3.3 | Язык разработки |
+| **Vue Router** | 4.3.0 | Маршрутизация |
+| **Axios** | 1.6.7 | HTTP клиент |
+| **Vite** | 5.0.12 | Build tool |
+| **HTML5/CSS3** | Modern | Верстка и стили |
 
----
-
-## ✨ Реализованный функционал
-
-### 1️⃣ Аутентификация и авторизация
-- ✅ Регистрация новых пользователей с валидацией
-- ✅ Вход с выдачей JWT-токенов
-- ✅ **Access Token** (короткоживущий, 24 часа)
-- ✅ **Refresh Token** (для обновления access-токена)
-- ✅ Безопасное обновление токенов (одноразовое использование)
-- ✅ Выход из сессии (logout)
-
-### 2️⃣ Управление сессиями
-- ✅ Несколько активных сессий пользователя
-- ✅ Валидация сессии при каждом запросе
-- ✅ Завершение одной или нескольких сессий
-- ✅ Периодическая очистка устаревших сессий (Scheduled)
-- ✅ Отслеживание IP-адреса и User-Agent
-
-### 3️⃣ Работа с результатами
-- ✅ Добавление результатов проверки точек
-- ✅ Получение всех результатов пользователя
-- ✅ Очистка всех результатов пользователя
-- ✅ Кеширование результатов в памяти
-- ✅ Хранение времени выполнения операции
-
-### 4️⃣ HTTP-фильтрация и логирование
-- ✅ Фильтр проверки JWT и сессии
-- ✅ Логирование всех HTTP-запросов
-- ✅ Конфигурация CORS для кросс-доменных запросов
-- ✅ Логирование SQL-запросов на уровне Hibernate
-
-### 5️⃣ Клиентская часть
-- ✅ Экран логина с валидацией
-- ✅ Экран регистрации
-- ✅ Главная страница с:
-  - Графиком визуализации точек
-  - Формой ввода параметров (X, Y, R)
-  - Таблицей результатов с сортировкой
-- ✅ Модаль управления активными сессиями
-- ✅ HTTP-интерсептор для добавления JWT-токена
-- ✅ Адаптивный интерфейс для всех экранов
+**Node.js:** 18+  
+**npm:** 9+
 
 ---
 
-## 📁 Структура проекта
+## Архитектура приложения
+
+### Трёхслойная архитектура Backend
 
 ```
-web_lab_4/
-├── src/main/java/com/weblab/
-│   ├── Application.java                      # Точка входа приложения
-│   ├── config/
-│   │   ├── WebConfig.java                    # CORS и веб-конфигурация
-│   │   └── RepositoryLoggingAspect.java      # AOP для логирования БД
-│   ├── controller/
-│   │   ├── AuthController.java               # API: login/register/logout
-│   │   ├── ResultController.java             # API: работа с результатами
-│   │   └── SessionController.java            # API: управление сессиями
-│   ├── dto/
-│   │   ├── AuthResponse.java                 # Ответ при входе
-│   │   ├── LoginRequest.java                 # Запрос логина
-│   │   ├── RegisterRequest.java              # Запрос регистрации
-│   │   ├── PointRequest.java                 # Запрос проверки точки
-│   │   ├── RefreshTokenRequest.java          # Обновление токена
-│   │   ├── ResultResponse.java               # Ответ с результатом
-│   │   └── SessionClosedDTO.java             # Информация о сессии
-│   ├── entity/
-│   │   ├── User.java                         # Сущность пользователя
-│   │   ├── Session.java                      # Сущность сессии
-│   │   └── Result.java                       # Сущность результата проверки
-│   ├── filter/
-│   │   ├── JwtAuthenticationFilter.java      # Проверка JWT и сессии
-│   │   └── RequestLoggingFilter.java         # Логирование HTTP-запросов
-│   ├── repository/
-│   │   ├── UserRepository.java               # JPA для пользователей
-│   │   ├── SessionRepository.java            # JPA для сессий
-│   │   └── ResultRepository.java             # JPA для результатов
-│   ├── service/
-│   │   ├── AuthService.java                  # Логика аутентификации
-│   │   ├── JwtTokenProvider.java             # Создание/проверка JWT
-│   │   ├── SessionService.java               # Управление сессиями
-│   │   ├── UserService.java                  # Работа с пользователями
-│   │   ├── ResultService.java                # Работа с результатами
-│   │   ├── ResultCacheService.java           # In-memory кеш результатов
-│   │   └── SessionCleanupService.java        # Очистка устаревших сессий
-│   └── util/
-│       └── RequestUtils.java                 # Утилиты для работы с запросами
-├── src/main/resources/
-│   ├── application.properties                # Конфигурация (PostgreSQL)
-│   └── application-dev.properties            # Конфигурация (H2)
-├── front/                                    # Frontend (Angular)
-│   ├── src/
-│   │   ├── index.html
-│   │   ├── main.ts
-│   │   ├── styles.css
-│   │   └── app/
-│   │       ├── app.ts                        # Корневой компонент
-│   │       ├── app.routes.ts                 # Маршруты приложения
-│   │       ├── app.config.ts                 # Конфигурация Angular
-│   │       ├── components/
-│   │       │   ├── login/                    # Компонент входа
-│   │       │   ├── register/                 # Компонент регистрации
-│   │       │   ├── main/                     # Главная страница
-│   │       │   └── session-modal/            # Модаль сессий
-│   │       ├── services/
-│   │       │   ├── auth.ts                   # Сервис аутентификации
-│   │       │   ├── point.ts                  # Сервис результатов
-│   │       │   └── session-monitor.ts        # Мониторинг сессии
-│   │       ├── interceptors/
-│   │       │   └── auth.ts                   # HTTP-интерсептор для JWT
-│   │       └── models/
-│   │           └── types.ts                  # TypeScript-типы и интерфейсы
-│   ├── package.json                          # Зависимости npm
-│   ├── proxy.conf.json                       # Проксирование на backend
-│   └── angular.json                          # Конфигурация Angular CLI
-├── build.gradle                              # Конфигурация Gradle
-├── settings.gradle
-├── gradlew & gradlew.bat                     # Gradle wrapper
-└── README.md
+┌─────────────────────────────────────────┐
+│           REST API (JAX-RS)             │
+│  (AuthResource, ResultResource, etc)    │
+├─────────────────────────────────────────┤
+│         Service Layer (Бизнес-логика)  │
+│  (AuthService, ResultService, etc)      │
+├─────────────────────────────────────────┤
+│     Repository Layer (Доступ к БД)     │
+│  (UserRepository, ResultRepository)     │
+├─────────────────────────────────────────┤
+│      Database Layer (Apache Derby)     │
+└─────────────────────────────────────────┘
+```
 
+### MVC архитектура Frontend
+
+```
+┌──────────────────────────────────────────┐
+│         Vue Components (View)            │
+│  (LoginView, MainView, RegisterView)     │
+├──────────────────────────────────────────┤
+│      Services (Business Logic)           │
+│  (AuthService, PointService)             │
+├──────────────────────────────────────────┤
+│      Router (Routing)                    │
+│  (Vue Router с Guards)                   │
+├──────────────────────────────────────────┤
+│   HTTP Layer (Axios + Interceptors)      │
+└──────────────────────────────────────────┘
+```
+
+### Поток взаимодействия
+
+```
+Frontend (Vue 3)          Network (HTTP)          Backend (JAX-RS)
+     │                                                  │
+     ├──> [Login Form] ───────────────────────────> AuthResource
+     │                                                  │
+     │                                            ↓ AuthService
+     │                                            ↓ UserRepository
+     │                                            ↓ JwtUtil
+     │    ◄──────────────────── JWT Token ────────┤
+     │                                                  │
+     ├──> [Check Point] ────────────────────────> ResultResource
+     │    + Authorization Header                       │
+     │                                            ↓ ResultService
+     │                                            ↓ HitChecker
+     │    ◄────────────── Result JSON ──────────┤
+     │
+     └──> Display Results                        Storage: Derby DB
 ```
 
 ---
 
-## 🚀 Установка и запуск
+## Реализованный функционал
 
-### ✋ Предварительные требования
+### 1. Аутентификация и авторизация
 
-- **Java 17+** (для backend)
-- **Node.js 18+** и **npm** (для frontend)
-- **PostgreSQL 12+** (опционально, можно использовать H2)
-- **Gradle** (автоматически через `gradlew`)
+#### ✅ Регистрация пользователей
+- Валидация логина и пароля
+- Проверка уникальности пользователя
+- Хеширование пароля с использованием BCrypt
+- Автоматическая генерация JWT токенов
 
-### 1️⃣ Подготовка базы данных
-
-#### Вариант A: PostgreSQL (production)
-
+**Пример запроса:**
 ```bash
-# Убедитесь, что PostgreSQL запущена
-# Linux/Mac:
-psql -U postgres -c "CREATE DATABASE lab_4;"
+POST /api/auth/register
+Content-Type: application/json
 
-# Windows (cmd/PowerShell):
-psql -U postgres -c "CREATE DATABASE lab_4;"
-```
-
-#### Вариант B: H2 (разработка, в памяти)
-
-Используется по умолчанию при профиле `dev`, не требует дополнительной установки.
-
-### 2️⃣ Запуск Backend (Spring Boot)
-
-```bash
-# Перейдите в корневую директорию проекта
-cd web_lab_4
-
-# Вариант 1: С PostgreSQL (по умолчанию)
-./gradlew bootRun
-
-# Вариант 2: С H2 в памяти (для разработки)
-./gradlew bootRun --args='--spring.profiles.active=dev'
-
-# Вариант 3: Windows (cmd)
-gradlew.bat bootRun
-```
-
-**Ожидаемый вывод:**
-```
-Started Application in 5.234 seconds
-Application 'web-lab-auth' running on http://localhost:8080
-```
-
-✅ Backend доступен по адресу: **http://localhost:8080**
-
-### 3️⃣ Запуск Frontend (Angular)
-
-```bash
-# В новом терминале, перейдите в директорию frontend
-cd web_lab_4/front
-
-# Установите зависимости (первый раз)
-npm install
-
-# Запустите dev-сервер
-npm start
-# или
-ng serve
-```
-
-**Ожидаемый вывод:**
-```
-✔ Compiled successfully.
-Local: http://localhost:4200/
-```
-
-✅ Frontend доступен по адресу: **http://localhost:4200**
-
-#### ⚠️ Важно!
-- Backend должен быть запущен **перед** фронтом
-- Frontend использует `proxy.conf.json` для перенаправления запросов на backend
-- Оба сервера должны быть запущены одновременно для полной работы
-
-### 4️⃣ Сборка для production
-
-#### Backend (JAR файл)
-```bash
-./gradlew bootJar
-# JAR-файл будет в build/libs/web-lab-auth-1.0.0.jar
-
-# Запуск
-java -jar build/libs/web-lab-auth-1.0.0.jar
-```
-
-#### Frontend (Static assets)
-```bash
-cd front
-npm run build
-# Результат в front/dist/
-```
-
----
-
-## 🔐 Конфигурация
-
-### Backend (application.properties)
-
-**src/main/resources/application.properties** (PostgreSQL):
-```properties
-server.port=8080
-spring.application.name=web-lab-auth
-
-# PostgreSQL Configuration
-spring.datasource.url=jdbc:postgresql://localhost:5432/lab_4
-spring.datasource.username=postgres
-spring.datasource.password=postgres
-spring.datasource.driver-class-name=org.postgresql.Driver
-
-# JPA/Hibernate
-spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL10Dialect
-spring.jpa.hibernate.ddl-auto=none
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-
-# Logging
-logging.level.com.weblab=DEBUG
-logging.level.org.springframework.web=DEBUG
-logging.level.org.hibernate.SQL=DEBUG
-
-# JWT Configuration
-jwt.secret=my-super-secret-key-that-is-at-least-256-bits-long
-jwt.expiration=86400000  # 24 часа в миллисекундах
-```
-
-**src/main/resources/application-dev.properties** (H2):
-```properties
-server.port=8080
-
-# H2 Database (in-memory)
-spring.datasource.url=jdbc:h2:mem:testdb
-spring.datasource.driver-class-name=org.h2.Driver
-spring.datasource.username=sa
-spring.datasource.password=
-spring.h2.console.enabled=true
-spring.h2.console.path=/h2-console
-
-# Hibernate
-spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
-spring.jpa.hibernate.ddl-auto=create-drop
-spring.jpa.show-sql=true
-```
-
-### Frontend (proxy.conf.json)
-
-**front/proxy.conf.json** (разработка):
-```json
 {
-  "/api": {
-    "target": "http://localhost:8080",
-    "changeOrigin": true,
-    "logLevel": "debug"
-  }
+  "username": "john_doe",
+  "email": "john@example.com",
+  "password": "SecurePass123"
 }
 ```
 
----
-
-## 📝 REST API Endpoints
-
-### Аутентификация (`/api/auth`)
-
-| Метод | Endpoint | Описание | Требует JWT | Пример тела |
-|-------|----------|---------|-----------|-----------|
-| POST | `/register` | Регистрация | ❌ | `{username, password, email, deviceName}` |
-| POST | `/login` | Вход | ❌ | `{username, password, deviceName}` |
-| POST | `/refresh` | Обновить токен | ✅ | `{refreshToken}` |
-| POST | `/logout` | Выход | ✅ | - |
-
-**Пример регистрации:**
-```bash
-curl -X POST http://localhost:8080/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "john_doe",
-    "password": "SecurePass123!",
-    "email": "john@example.com",
-    "deviceName": "Chrome on Windows"
-  }'
-```
-
-**Ответ (успех):**
+**Пример ответа:**
 ```json
 {
   "success": true,
   "message": "Регистрация успешна",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "sessionId": 1,
   "user": {
     "id": 1,
     "username": "john_doe",
@@ -378,186 +189,374 @@ curl -X POST http://localhost:8080/api/auth/register \
 }
 ```
 
-### Результаты (`/api/results`)
+#### ✅ Вход в систему
+- Проверка учётных данных
+- Генерация Access Token (24 часа)
+- Генерация Refresh Token (7 дней)
+- Поддержка множественных сессий
 
-| Метод | Endpoint | Описание | Требует JWT |
-|-------|----------|---------|-----------|
-| POST | `/check` | Проверить точку | ✅ |
-| GET | `/` | Все результаты | ✅ |
-| DELETE | `/` | Очистить результаты | ✅ |
+#### ✅ Обновление токенов
+- Валидация refresh-токена
+- Одноразовое использование refresh-токена
+- Автоматическое обновление при истечении access-token
 
-**Пример проверки точки:**
-```bash
-curl -X POST http://localhost:8080/api/results/check \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer TOKEN" \
-  -d '{"x": 1.5, "y": 2.0, "r": 3.0}'
+#### ✅ Выход из системы
+- Инвалидация сессии
+- Удаление refresh-токена
+
+### 2. Проверка точек в области
+
+#### ✅ Основной алгоритм
+Проверка попадания точки (X, Y) в область с параметром R:
+
+```
+Область состоит из трёх частей:
+1. Прямоугольник: -R ≤ X ≤ 0, 0 ≤ Y ≤ R
+2. Треугольник: 0 ≤ X ≤ R, 0 ≤ Y ≤ R, X + Y ≤ R
+3. Полукруг: X² + Y² ≤ R², Y ≥ 0
 ```
 
-### Сессии (`/api/sessions`)
+**Реализация (HitChecker):**
+```java
+public static boolean checkHit(double x, double y, double r) {
+    // Прямоугольник (-R, 0) - (0, R)
+    if (x >= -r && x <= 0 && y >= 0 && y <= r) return true;
+    
+    // Треугольник (0, 0) - (R, 0) - (0, R)
+    if (x >= 0 && y >= 0 && x + y <= r) return true;
+    
+    // Полукруг x² + y² ≤ R², y ≥ 0
+    if (x >= 0 && y >= 0 && x*x + y*y <= r*r) return true;
+    
+    return false;
+}
+```
 
-| Метод | Endpoint | Описание | Требует JWT |
-|-------|----------|---------|-----------|
-| GET | `/` | Активные сессии | ✅ |
-| DELETE | `/{id}` | Завершить сессию | ✅ |
+#### ✅ Сохранение результатов
+- Сохранение в БД (Apache Derby)
+- Кеширование в памяти для быстрого доступа
+- Временная метка выполнения
+
+### 3. Управление результатами
+
+#### ✅ Получение истории
+- Все результаты пользователя
+- Сортировка по дате/времени
+- Фильтрация по параметрам
+
+#### ✅ Очистка результатов
+- Удаление всех результатов пользователя
+- Очистка кеша
+
+### 4. Управление сессиями
+
+#### ✅ Отслеживание активности
+- Сохранение IP-адреса
+- Сохранение User-Agent
+- Время создания сессии
+
+#### ✅ Множественные сессии
+- Одновременно активные сессии на разных устройствах
+- Независимая валидация каждой сессии
+
+### 5. Интерфейс пользователя
+
+#### ✅ Страница входа (LoginView)
+- Форма с валидацией
+- Обработка ошибок
+- Переход к регистрации
+
+#### ✅ Страница регистрации (RegisterView)
+- Форма регистрации
+- Валидация полей
+- Обработка конфликтов (дублирующийся логин)
+
+#### ✅ Главная страница (MainView)
+- **GraphCanvas** — визуализация области на SVG
+- **PointForm** — форма ввода параметров X, Y, R
+- **ResultsTable** — таблица результатов с сортировкой и фильтрацией
+
+#### ✅ Интерактивные компоненты
+- Клик по графику для добавления точки
+- Real-time визуализация выбранной области
+- Вывод всех результатов в таблице
 
 ---
 
-## 🧪 Тестирование
+## Технические решения
 
-### Backend
-```bash
-./gradlew test
+### Security (Безопасность)
+
+#### JWT (JSON Web Token)
+- **Access Token**: Короткоживущий (24 часа), содержит ID пользователя и логин
+- **Refresh Token**: Долгоживущий (7 дней), используется для обновления access-token
+- **Алгоритм**: HMAC SHA-256
+- **Секретный ключ**: Конфигурируемый, минимум 256 бит
+
+#### Хеширование паролей
+- **BCrypt**: Адаптивный алгоритм с солью
+- **Функция**: `BCrypt.hashpw(password, BCrypt.gensalt())`
+- **Защита**: Брутфорс атаки невозможны из-за медленности BCrypt
+
+#### Валидация запросов
+- Проверка наличия JWT в заголовках
+- Валидация подписи токена
+- Проверка срока действия
+
+### Работа с БД (Database)
+
+#### Apache Derby
+- **Тип**: Встроенная реляционная БД
+- **Преимущества**:
+    - Не требует отдельного сервера
+    - Автоматическое создание схемы
+    - Встроенная транзакционность
+    - Персистентное хранилище (файлы на диске)
+
+#### JPA/EclipseLink
+- **ORM маппинг** сущностей на таблицы
+- **JPQL** для запросов
+- **Управление транзакциями** через JPA
+
+#### Схема БД
+
+```sql
+-- Таблица пользователей
+CREATE TABLE user_entity (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255),
+    password_hash VARCHAR(255) NOT NULL
+);
+
+-- Таблица refresh-токенов
+CREATE TABLE refresh_token_entity (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    user_id BIGINT NOT NULL,
+    token_hash VARCHAR(512) NOT NULL,
+    expires_at BIGINT NOT NULL,
+    FOREIGN KEY(user_id) REFERENCES user_entity(id)
+);
+
+-- Таблица результатов проверки
+CREATE TABLE point_entity (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    user_id BIGINT NOT NULL,
+    x DOUBLE NOT NULL,
+    y DOUBLE NOT NULL,
+    r DOUBLE NOT NULL,
+    hit BOOLEAN NOT NULL,
+    execution_time_ms BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    FOREIGN KEY(user_id) REFERENCES user_entity(id)
+);
 ```
 
-### Frontend
-```bash
-cd front
-npm test
+### REST API Design
+
+#### Принципы
+- **RESTful архитектура** с правильной семантикой HTTP методов
+- **Стандартные коды ответов** (200, 201, 400, 401, 403, 500)
+- **JSON** как единственный формат обмена данных
+- **Versionless API** (версионирование через Content-Type)
+
+#### Endpoints
+
+| Метод | Endpoint | Описание | Auth |
+|-------|----------|---------|------|
+| POST | `/api/auth/register` | Регистрация | ❌ |
+| POST | `/api/auth/login` | Вход | ❌ |
+| POST | `/api/auth/refresh` | Обновить токен | ✅ |
+| POST | `/api/auth/logout` | Выход | ✅ |
+| POST | `/api/results/check` | Проверить точку | ✅ |
+| GET | `/api/results` | Все результаты | ✅ |
+| DELETE | `/api/results` | Очистить результаты | ✅ |
+
+### Frontend (Vue 3 + TypeScript)
+
+#### Компонентная архитектура
+- **Однофайловые компоненты** (SFC — Single File Components)
+- **TypeScript** для типизации
+- **Composition API** для логики компонентов
+
+#### Router Guards
+```typescript
+// Защита маршрутов от неавторизованного доступа
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAuth && !authService.isAuthenticated()) {
+    next('/login');
+  } else {
+    next();
+  }
+});
+```
+
+#### HTTP Interceptors
+```typescript
+// Автоматическое добавление JWT в заголовки
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem('accessToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+```
+
+#### State Management
+- **localStorage** для сохранения токенов между сеансами
+- **Reactive objects** в сервисах для управления состоянием
+- **Computed properties** для производных данных
+
+### Кеширование
+
+#### In-Memory Cache
+- Результаты хранятся в памяти для быстрого доступа
+- Асинхронное обновление из БД при необходимости
+
+```java
+private static final Map<Long, List<PointEntity>> resultCache = new ConcurrentHashMap<>();
+```
+
+#### Cache Invalidation
+- При добавлении нового результата
+- При очистке результатов пользователя
+- При логауте пользователя
+
+---
+
+## Структура проекта
+
+### Backend структура
+
+```
+src/main/java/com/weblab/
+├── Main.java                          # Точка входа приложения
+├── config/
+│   ├── AppConfig.java                 # Конфигурация JAX-RS
+│   ├── CorsFilter.java                # CORS фильтр
+│   ├── JacksonConfig.java             # Конфигурация JSON
+│   └── OptionsRequestFilter.java      # Обработка OPTIONS запросов
+├── db/
+│   └── Database.java                  # Инициализация JPA/Derby
+├── dto/                               # Data Transfer Objects
+│   ├── AuthResponse.java
+│   ├── LoginRequest.java
+│   ├── PointRequest.java
+│   ├── RefreshTokenRequest.java
+│   └── RegisterRequest.java
+├── entity/                            # JPA сущности
+│   ├── PointEntity.java               # Результат проверки
+│   ├── RefreshTokenEntity.java        # Refresh-токен
+│   └── UserEntity.java                # Пользователь
+├── filter/
+│   └── AuthFilter.java                # JWT валидация фильтр
+├── repository/                        # Data Access Layer
+│   ├── RefreshTokenRepository.java
+│   ├── ResultRepository.java
+│   └── UserRepository.java
+├── resource/                          # REST контроллеры
+│   ├── AuthResource.java              # /api/auth
+│   └── ResultResource.java            # /api/results
+├── service/                           # Business Logic
+│   ├── AuthService.java               # Аутентификация
+│   └── ResultService.java             # Работа с результатами
+└── util/
+    ├── HitChecker.java                # Проверка попадания
+    └── JwtUtil.java                   # JWT операции
+
+src/main/resources/
+└── META-INF/
+    └── persistence.xml                # JPA конфигурация
+```
+
+### Frontend структура
+
+```
+frontendVUE/
+├── src/
+│   ├── main.ts                        # Точка входа
+│   ├── App.vue                        # Корневой компонент
+│   ├── assets/
+│   │   └── styles.css                 # Глобальные стили
+│   ├── components/
+│   │   ├── GraphCanvas.vue            # SVG график
+│   │   ├── PointForm.vue              # Форма ввода
+│   │   └── ResultsTable.vue           # Таблица результатов
+│   ├── models/
+│   │   └── types.ts                   # TypeScript типы
+│   ├── router/
+│   │   └── index.ts                   # Конфигурация маршрутов
+│   ├── services/
+│   │   ├── api.ts                     # Axios конфигурация
+│   │   ├── authService.ts             # Сервис аутентификации
+│   │   └── pointService.ts            # Сервис результатов
+│   └── views/
+│       ├── LoginView.vue              # Экран входа
+│       ├── MainView.vue               # Главная страница
+│       └── RegisterView.vue           # Экран регистрации
+├── vite.config.ts                     # Конфигурация Vite
+├── tsconfig.json                      # TypeScript конфигурация
+└── package.json                       # Зависимости npm
 ```
 
 ---
 
-## 🔑 Ключевые особенности
+## Выводы
 
-### Backend
-✅ Spring Security с JWT-токенами  
-✅ JPA/Hibernate для работы с БД  
-✅ Spring AOP для логирования  
-✅ Многослойная архитектура (Controller → Service → Repository)  
-✅ Валидация входных данных  
-✅ In-memory кеширование результатов  
-✅ Scheduled очистка сессий  
-✅ HTTP-фильтры для аутентификации  
+### Достигнутые цели
 
-### Frontend
-✅ Angular Standalone Components  
-✅ RxJS Observables и реактивное программирование  
-✅ HTTP Interceptors для JWT-токенов  
-✅ Route Guards для защиты страниц  
-✅ Валидация форм  
-✅ TypeScript для типизации  
-✅ Адаптивный дизайн  
+✅ **Полностью реализовано веб-приложение** со всеми требуемыми функциями  
+✅ **Безопасная аутентификация** на основе JWT токенов  
+✅ **Персистентное хранилище** результатов в БД  
+✅ **Интерактивный интерфейс** на современном фреймворке  
+✅ **REST API** с правильной семантикой  
+✅ **Типизированный код** (Java + TypeScript)
 
----
+### Ключевые технические решения
 
-## 🐛 Troubleshooting
+1. **JAX-RS + Jersey** — простой и мощный фреймворк для REST API
+2. **Apache Derby** — встроенная БД без необходимости отдельного сервера
+3. **JWT** — стандартный способ аутентификации в веб-приложениях
+4. **Vue 3 + TypeScript** — современный, типизированный фреймворк
+5. **JPA/EclipseLink** — удобный ORM слой над БД
 
-### ❌ Ошибка подключения к PostgreSQL
-```
-ERROR: Connection to localhost:5432 refused
-```
-**✅ Решение:**
-1. Проверьте, что PostgreSQL запущена: `psql -U postgres`
-2. Или используйте H2: `./gradlew bootRun --args='--spring.profiles.active=dev'`
+### Полученные навыки
 
-### ❌ Ошибка CORS
-```
-Access to XMLHttpRequest blocked by CORS policy
-```
-**✅ Решение:**
-1. Проверьте `WebConfig.java` — CORS настроен там
-2. Убедитесь, что используется `proxy.conf.json` при разработке
+- Разработка REST API на Java
+- Работа с JWT аутентификацией и токенами
+- Проектирование БД и работа с JPA
+- Разработка SPA на Vue 3 + TypeScript
+- Применение паттернов архитектуры (MVC, трёхслойная архитектура)
+- Безопасность веб-приложений (BCrypt, CORS, JWT)
+- Использование современных инструментов разработки (Gradle, Vite, npm)
 
-### ❌ Frontend не видит backend
-```
-Failed to fetch http://localhost:4200/api/auth/login
-```
-**✅ Решение:**
-1. Backend должен быть на `http://localhost:8080` (./gradlew bootRun)
-2. Frontend должен быть на `http://localhost:4200` (npm start)
-3. Используется `proxy.conf.json` для перенаправления
+### Возможные улучшения
 
-### ❌ JWT-токен истёк
-```
-{"error": "Token has expired"}
-```
-**✅ Решение:**
-1. AuthService на фронте автоматически обновляет токен через refresh-token
-2. Или заново войдите в систему
-
-### ❌ Port 8080/4200 занят
-```
-Address already in use
-```
-**✅ Решение:**
-```bash
-# Backend на другом порту
-./gradlew bootRun --args='--server.port=8081'
-
-# Frontend на другом порту
-ng serve --port 4201
-```
-
-### ❌ Node modules не установлены
-```
-Cannot find module '@angular/core'
-```
-**✅ Решение:**
-```bash
-cd front
-npm install
-```
+- Добавить unit и integration тесты
+- Реализовать rate limiting для защиты от DDoS
+- Добавить двухфакторную аутентификацию (2FA)
+- Миграция на Spring Boot для большей функциональности
+- Добавить WebSocket для real-time обновлений
+- Развернуть на облачной платформе (AWS, Azure, GCP)
+- Добавить документацию API (Swagger/OpenAPI)
 
 ---
 
-## 📊 Компоненты системы
+## 📚 Использованная литература
 
-### Backend контроллеры
-- **AuthController** — регистрация, вход, выход, обновление токена
-- **ResultController** — добавление результатов, получение, очистка
-- **SessionController** — управление сессиями пользователя
-
-### Backend сервисы
-- **AuthService** — бизнес-логика аутентификации
-- **JwtTokenProvider** — создание и валидация JWT-токенов
-- **SessionService** — управление сессиями и токенами
-- **ResultService** — работа с результатами и кешем
-- **UserService** — управление пользователями
-- **SessionCleanupService** — периодическая очистка
-
-### Frontend компоненты
-- **LoginComponent** — форма входа
-- **RegisterComponent** — форма регистрации
-- **MainComponent** — главная страница с графиком и таблицей
-- **SessionModalComponent** — управление сессиями
-
-### Frontend сервисы
-- **AuthService** — аутентификация и токены
-- **PointService** — работа с результатами
-- **SessionMonitorService** — мониторинг активности
+1. JAX-RS 2.1 Specification (JSR 370)
+2. JWT: JSON Web Token Specification (RFC 7519)
+3. Vue.js 3 Official Documentation
+4. Apache Derby Reference Manual
+5. OWASP Web Security Guidelines
+6. RESTful Web Services Best Practices
 
 ---
 
-## 📚 Дополнительные ресурсы
+**Дата завершения:** 2025-2026  
+**Язык программирования:** Java 17 + TypeScript 5.3  
+**Фреймворки:** JAX-RS, Vue 3  
+**Базы данных:** Apache Derby (JPA/EclipseLink)
 
-- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
-- [Angular Documentation](https://angular.io/docs)
-- [JWT RFC 7519](https://tools.ietf.org/html/rfc7519)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [Spring Security](https://spring.io/projects/spring-security)
-- [Hibernate ORM](https://hibernate.org/orm/)
-
----
-
-## 📄 Информация о проекте
-
-**Создано:** 2024-2025  
-**Язык программирования:** Java + TypeScript  
-**Версия Java:** 17+  
-**Версия Angular:** 21+  
-**Версия Spring Boot:** 3.1.5  
-**Тип проекта:** Учебный
-
-Проект создан в рамках курса **"Программирование"** в университете **ИТМО** под руководством:
-- **Практик:** Ермаков Михаил Константинович
-- **Лектор:** Гаврилов Антон Валерьевич
-
-**Студент:** Ануфриев Андрей Сергеевич (Группа P3119)
-
----
-
-## 📄 Лицензия
-
-Проект создан в образовательных целях как часть курса программирования ИТМО.
 
